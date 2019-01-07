@@ -597,7 +597,7 @@ with open(results_files_path + "/results.txt", 'w') as results_file:
     #print(rec)
     prec = tp[:]
     for idx, val in enumerate(tp):
-      prec[idx] = float(tp[idx]) / (fp[idx] + tp[idx])
+      prec[idx] = float(tp[idx]) / (fp[idx] + tp[idx]+1e-5)
     #print(prec)
 
     ap, mrec, mprec = voc_ap(rec, prec)
