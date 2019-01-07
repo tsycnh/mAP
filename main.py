@@ -9,6 +9,9 @@ import argparse
 MINOVERLAP = 0.5 # default value (defined in the PASCAL VOC2012 challenge)
 
 parser = argparse.ArgumentParser()
+parser.add_argument("gt_dir",help="ground truth directory")
+parser.add_argument("pd_dir",help="predictions directory")
+parser.add_argument("-img_dir",help="images directory")
 parser.add_argument('-na', '--no-animation', help="no animation is shown.", action="store_true")
 parser.add_argument('-np', '--no-plot', help="no plot is shown.", action="store_true")
 parser.add_argument('-q', '--quiet', help="minimalistic console output.", action="store_true")
@@ -16,8 +19,16 @@ parser.add_argument('-q', '--quiet', help="minimalistic console output.", action
 parser.add_argument('-i', '--ignore', nargs='+', type=str, help="ignore a list of classes.")
 # argparse receiving list of classes with specific IoU
 parser.add_argument('--set-class-iou', nargs='+', type=str, help="set IoU for a specific class.")
-args = parser.parse_args()
 
+
+
+args = parser.parse_args()
+gt_dir = args.gt_dir
+pd_dir = args.pd_dir
+img_dir = args.img_dir
+# gt_dir = "./ground-truth/"
+# pd_dir = "./predicted/"
+# img_dir = "./images/"
 # if there are no classes to ignore then replace None by empty list
 if args.ignore is None:
   args.ignore = []
@@ -27,7 +38,7 @@ if args.set_class_iou is not None:
   specific_iou_flagged = True
 
 # if there are no images then no animation can be shown
-img_path = 'images'
+img_path = img_dir
 if os.path.exists(img_path): 
   for dirpath, dirnames, files in os.walk(img_path):
     if not files:
@@ -288,7 +299,7 @@ if show_animation:
    Create a list of all the class names present in the ground-truth (gt_classes).
 """
 # get a list with the ground-truth files
-ground_truth_files_list = glob.glob('ground-truth/*.txt')
+ground_truth_files_list = glob.glob(os.path.join(gt_dir,'*.txt'))
 if len(ground_truth_files_list) == 0:
   error("Error: No ground-truth files found!")
 ground_truth_files_list.sort()
@@ -300,7 +311,7 @@ for txt_file in ground_truth_files_list:
   file_id = txt_file.split(".txt",1)[0]
   file_id = os.path.basename(os.path.normpath(file_id))
   # check if there is a correspondent predicted objects file
-  if not os.path.exists('predicted/' + file_id + ".txt"):
+  if not os.path.exists(os.path.join(pd_dir,file_id + ".txt")):
     error_msg = "Error. File not found: predicted/" +  file_id + ".txt\n"
     error_msg += "(You can avoid this error message by running extra/intersect-gt-and-pred.py)"
     error(error_msg)
@@ -377,7 +388,7 @@ if specific_iou_flagged:
    Load each of the predicted files into a temporary ".json" file.
 """
 # get a list with the predicted files
-predicted_files_list = glob.glob('predicted/*.txt')
+predicted_files_list = glob.glob(os.path.join(pd_dir,'*.txt'))
 predicted_files_list.sort()
 
 for class_index, class_name in enumerate(gt_classes):
@@ -388,7 +399,7 @@ for class_index, class_name in enumerate(gt_classes):
     file_id = txt_file.split(".txt",1)[0]
     file_id = os.path.basename(os.path.normpath(file_id))
     if class_index == 0:
-      if not os.path.exists('ground-truth/' + file_id + ".txt"):
+      if not os.path.exists(os.path.join(gt_dir,file_id + ".txt")):
         error_msg = "Error. File not found: ground-truth/" +  file_id + ".txt\n"
         error_msg += "(You can avoid this error message by running extra/intersect-gt-and-pred.py)"
         error(error_msg)
